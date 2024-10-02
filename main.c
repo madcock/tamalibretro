@@ -149,6 +149,7 @@ void tamalr_sleep_until(timestamp_t ts)
 
 timestamp_t tamalr_get_timestamp(void)
 {
+#if !defined(SF2000)
   struct timespec current_time;
 
   clock_gettime(CLOCK_MONOTONIC, &current_time);
@@ -156,6 +157,11 @@ timestamp_t tamalr_get_timestamp(void)
     current_time.tv_sec * 1000000LL + current_time.tv_nsec / 1000LL);
 
   return ts;
+#else
+   struct timeval tv;
+   gettimeofday (&tv, NULL);
+   return (tv.tv_sec*1000000 + tv.tv_usec)/1000;
+#endif
 }
 
 void tamalr_update_screen(void)
@@ -382,6 +388,13 @@ void retro_run(void)
   tamalib_set_button(BTN_RIGHT, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A));
   tamalib_set_button(BTN_MIDDLE, input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B));
 
+#if defined(SF2000)
+  int16_t ret = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
+  tamalib_set_button(BTN_LEFT, (ret & (1 << RETRO_DEVICE_ID_JOYPAD_Y)));
+  tamalib_set_button(BTN_RIGHT, (ret & (1 << RETRO_DEVICE_ID_JOYPAD_A)));
+  tamalib_set_button(BTN_MIDDLE, (ret & (1 << RETRO_DEVICE_ID_JOYPAD_B)));
+#endif
+  
   /* Handle emulation */
   do
   {

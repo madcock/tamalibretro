@@ -273,6 +273,19 @@ else ifeq ($(platform), emscripten)
    TARGET := $(TARGET_NAME)_libretro_$(platform).bc
    STATIC_LINKING = 1
 
+# SF2000
+else ifeq ($(platform), sf2000)
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   MIPS:=/opt/mips32-mti-elf/2019.09-03-2/bin/mips-mti-elf-
+   CC = $(MIPS)gcc
+   CXX = $(MIPS)g++
+   AR = $(MIPS)ar
+   CFLAGS = -EL -march=mips32 -mtune=mips32 -msoft-float -G0 -mno-abicalls -fno-pic
+   CFLAGS += -ffast-math -fomit-frame-pointer -ffunction-sections -fdata-sections 
+   CFLAGS += -DSF2000
+   CXXFLAGS = $(CFLAGS)
+   STATIC_LINKING = 1
+   
 # GCW0
 else ifeq ($(platform), gcw0)
    TARGET := $(TARGET_NAME)_libretro.so
