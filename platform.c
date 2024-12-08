@@ -30,7 +30,13 @@ int tamalr_clock_gettime(clockid_t clock_id, struct timespec *tp)
     return EINVAL;
   }
 #else
+#if !defined(SF2000)
   clock_gettime(CLOCK_MONOTONIC, tp);
+#else
+   struct timeval tv;
+   gettimeofday (&tv, NULL);
+   return (tv.tv_sec*1000000 + tv.tv_usec)/1000;
+#endif
 #endif
 
   return 0;
