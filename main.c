@@ -11,6 +11,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "platform.h"
+
 #ifndef TAMALR_VIDEO_MAX_SCALE
   #define TAMALR_VIDEO_MAX_SCALE 8
 #endif
@@ -152,7 +154,7 @@ timestamp_t tamalr_get_timestamp(void)
 #if !defined(SF2000)
   struct timespec current_time;
 
-  clock_gettime(CLOCK_MONOTONIC, &current_time);
+  tamalr_clock_gettime(CLOCK_MONOTONIC, &current_time);
   timestamp_t ts = (timestamp_t)(
     current_time.tv_sec * 1000000LL + current_time.tv_nsec / 1000LL);
 
@@ -428,7 +430,11 @@ void retro_get_system_info(struct retro_system_info *info)
 {
   memset(info, 0, sizeof(*info));
   info->library_name     = "TamaLIBretro";
+#if defined(GIT_VERSION)
   info->library_version  = "git" GIT_VERSION;
+#else
+  info->library_version  = "git";
+#endif
   info->need_fullpath    = false;
   info->valid_extensions = "b|rom|bin";
   info->block_extract    = false;
@@ -616,6 +622,7 @@ bool retro_unserialize(const void *data, size_t size)
   if (!tamalr_unserialize(data, &offset, state->call_depth, sizeof(u32_t))) return false;
   if (!tamalr_unserialize(data, &offset, state->interrupts, sizeof(interrupt_t) * INT_SLOT_NUM)) return false;
   if (!tamalr_unserialize(data, &offset, state->memory, MEM_BUFFER_SIZE)) return false;
+  tamalib_refresh_hw();
 
   return true;
 }
